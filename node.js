@@ -72,8 +72,6 @@ function Event(type, target) {
 // thread boundary, but behaves differently in each context.
 export default threads.isMainThread ? mainThread() : workerThread();
 
-const baseUrl = URL.pathToFileURL(process.cwd() + '/');
-
 function mainThread() {
 
 	/**
@@ -96,9 +94,8 @@ function mainThread() {
 			let mod;
 			if (/^data:/.test(url)) {
 				mod = url;
-			}
-			else {
-				mod = URL.fileURLToPath(new URL.URL(url, baseUrl));
+			} else {
+			   throw new Error('only data uris')
 			}
 			const worker = new threads.Worker(
 				__filename,
@@ -133,6 +130,7 @@ function mainThread() {
 
 function workerThread() {
 	let { mod, name, type } = threads.workerData;
+        require('cross-fetch/polyfill');
 
 	// turn global into a mock WorkerGlobalScope
 	const self = global.self = global;
@@ -156,6 +154,12 @@ function workerThread() {
 	});
 
 	class WorkerGlobalScope extends EventTarget {
+ 	   MessageChannel = threads.MessageChannel
+ 	   MessagePort = threads.MessagePort
+ 	   fetch = global.fetch
+ 	   Request = global.Request
+ 	   Response = global.Response
+	
 		postMessage(data, transferList) {
 			threads.parentPort.postMessage(data, transferList);
 		}
@@ -164,11 +168,12 @@ function workerThread() {
 	delete proto.constructor;
 	Object.defineProperties(WorkerGlobalScope.prototype, proto);
 	proto = Object.setPrototypeOf(global, new WorkerGlobalScope());
-	['postMessage', 'addEventListener', 'removeEventListener', 'dispatchEvent'].forEach(fn => {
+	['postMessage', 'addEventListener', 'removeEventListener', 'dispatchEvent', 'MessageChannel', 'MessagePort', 'fetch', 'Request', 'Response'].forEach(fn => {
 		proto[fn] = proto[fn].bind(global);
 	});
 	global.name = name;
-
+	delete global['process']
+	
 	const isDataUrl = /^data:/.test(mod);
 	if (type === 'module') {
 		import(mod)

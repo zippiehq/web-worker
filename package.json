@@ -1,5 +1,5 @@
 {
-  "name": "web-worker",
+  "name": "@zippie/web-worker",
   "version": "1.0.0",
   "description": "Consistent Web Workers in browser and Node.",
   "main": "./cjs/node.js",
