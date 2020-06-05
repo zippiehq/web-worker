@@ -16,7 +16,7 @@
     "node.js"
   ],
   "scripts": {
-    "prepare": "babel node.js browser.js -d cjs",
+    "prepare": "babel --plugins '@babel/plugin-proposal-class-properties' node.js browser.js -d cjs",
     "test": "eslint '*.js' test && node --experimental-modules ./node_modules/.bin/ava"
   },
   "babel": {
@@ -53,5 +53,9 @@
     "babel-plugin-commonjs-lite": "gist:3e38560d5bed35da1fd708d635e4acb3",
     "eslint": "^6.8.0",
     "eslint-config-developit": "^1.1.1"
+  },
+  "dependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.10.1",
+    "cross-fetch": "^3.0.4"
   }
 }
