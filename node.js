@@ -131,10 +131,11 @@ function mainThread() {
 function workerThread() {
 	let { mod, name, type } = threads.workerData;
         require('cross-fetch/polyfill');
-
+        
 	// turn global into a mock WorkerGlobalScope
 	const self = global.self = global;
-
+	self.XMLHttpRequest = require('xhr2')
+	
 	// enqueue messages to dispatch after modules are loaded
 	let q = [];
 	function flush() {
